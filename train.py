@@ -1,3 +1,4 @@
+import os
 import torch
 import torch.cuda
 import torch.nn
@@ -77,7 +78,7 @@ for epoch in tqdm(range(int(args.epochs))) :
     epoch_accuracy.append(best_accuracy)
 
     if epoch % 15 == 0 : ## Save the weights every 15 epochs 
-        torch.save(model.state_dict(), os.path.join(args.Logs, "wts" + str(epoch) + ".pth"))
+        torch.save(model.state_dict(), os.path.join(args.log_dir, "wts" + str(epoch) + ".pth"))
         print("Weights saved at epoch number", epoch) 
 
 PT.write_details(epoch_loss, epoch_accuracy, args.details_file)

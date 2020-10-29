@@ -15,9 +15,9 @@ def get_dataset(name, batchsize = 64) :
       "cifar100" : datasets.CIFAR100 
   } 
   datasetDist = {
-      "mnist" : (784, 10, 1) , ## 28*28 
-      "cifar10" : (1024, 10, 3) , ## 32*32  
-      "cifar100" : (1024, 100, 3) # 32*32, 100 classes
+      "mnist" : (28, 10, 1) , ## 28*28 
+      "cifar10" : (32, 10, 3) , ## 32*32  
+      "cifar100" : (32, 100, 3) # 32*32, 100 classes
   } 
   trainset = loaderDict[name](root = './data' + name, train=True, transform=transform, download=False)
   testset = loaderDict[name](root = './data' + name, train=False, transform=transform, download=False)
