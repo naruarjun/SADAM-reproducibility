@@ -134,3 +134,46 @@ class SC_Adagrad(Optimizer):
                 p.addcdiv_(grad, avg, value=-lr)
 
         return loss
+
+class SAdam(torch.optim.Optimizer):
+    
+    def __init__(self, params, beta_1=0.9, lr=0.01, delta=1e-2, xi_1=0.1, xi_2=1, gamma=0.9, decay=0., vary_delta=False):
+        defaults = dict(lr=lr, beta_1=beta_1, delta=delta, xi_1=xi_1, xi_2=xi_2, gamma=gamma, decay=decay, vary_delta=vary_delta)
+        super(SAdam, self).__init__(params, defaults)
+    
+    def __setstate__(self, state):
+        super(SAdam, self).__setstate__(state)
+    
+    def step(self,closure=None):
+        loss = None
+        if closure is not None:
+            loss = closure()
+        
+        for group in self.param_groups:
+            for p in group['params']:
+                if p.grad is None:
+                    continue
+                grad = p.grad
+                state = self.state[p]
+                if len(state)==0:
+                    state['step'] = 0
+                    # Exponential moving average of gradient values
+                    state['hat_g_t'] = torch.zeros_like(p, memory_format=torch.preserve_format)
+                    # Exponential moving average of squared gradient values
+                    state['v_t'] = torch.zeros_like(p, memory_format=torch.preserve_format)
+                hat_g_t, v_t = state['hat_g_t'], state['v_t']
+                beta_1, gamma, delta = group['beta_1'], group['gamma'], group['delta']
+                t = torch.tensor(state['step'])
+                state['step'] += 1
+                hat_g_t.mul_(beta_1).add_(grad, alpha=1 - beta_1)
+                v_t.mul_(gamma).addcmul_(grad, grad, value=1 - gamma)
+                lr = group['lr']
+                xi_1 = group['xi_1']
+                xi_2 = group['xi_2']
+                if group['vary_delta']:
+                    denom = t.mul_(v_t).add_(xi_2.mul_(torch.exp(-xi_1.mul_(t, v_t))))
+                    p.addcmul_(-lr, hat_g_t, 1/denom)
+                else:
+                    denom = t.mul_(v_t).add_(delta)
+                    p.addcmul_(-lr, hat_g_t, 1/denom)
+        return loss
