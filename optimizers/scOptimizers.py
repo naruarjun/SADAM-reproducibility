@@ -1,35 +1,33 @@
 import math         
 import torch 
 
-
 class SC_SGD(torch.optim.Optimizer) :
-    def __init__(self, params, lr=1e-3, eps=1e-6, wt_decay=0.0, correct_bias=True):
+    def __init__(self, params, lr=1e-3, eps=1e-6, wt_decay=0.0, correct_bias=True) :
 
         if lr < 0.0 : raise ValueError("Invalid LR {} Allowed >= 0.0".format(lr))
         if not eps >= 0.0 : raise ValueError("Invalid epsilon {} Allowed >= 0.0".format(eps))
 
-        defaults = dict(lr=lr, eps=eps, weight_decay=wt_decay, correct_bias=correct_bias)
-	steps = 0
+        defaults = dict(steps = 0,lr=lr, eps=eps, weight_decay=wt_decay, correct_bias=correct_bias)
         super(SC_SGD, self).__init__(params, defaults)
 
     def step(self, closure=None) :
         loss = None
         if closure is not None :
-            with torch.enable_grad() :	
-		loss = closure()
+            with torch.enable_grad() :  
+                loss = closure()
 
         for group in self.param_groups :
             for p in group['params'] :
                 if p.grad is None : continue
                 grad = p.grad
 
-		self.steps = self.steps + 1 
-		alpha = -group['lr']/math.sqrt(self.steps + eps)
-		p.add_(grad, alpha=alpha)
+                group['steps'] += 1 
+                alpha = -group['lr']/math.sqrt(group['steps'] + group['eps'])
+                p.add_(grad, alpha=alpha)
 
-	return loss 
+        return loss 
 
-class SC_RMSprop(Optimizer):
+class SC_RMSprop(torch.optim.Optimizer):
 
     def __init__(self, params, lr=1e-2, alpha=0.99, eps1=0.1, eps2=0.1, weight_decay=0):
         if not 0.0 <= lr : raise ValueError("Invalid learning rate: {}".format(lr))
@@ -40,10 +38,10 @@ class SC_RMSprop(Optimizer):
 
         
         defaults = dict(lr=lr, alpha=alpha, eps1=eps1, eps2=eps2, weight_decay=weight_decay)
-        super(RMSprop, self).__init__(params, defaults)
+        super(SC_RMSprop, self).__init__(params, defaults)
 
     def __setstate__(self, state):
-        super(RMSprop, self).__setstate__(state)
+        super(SC_RMSprop, self).__setstate__(state)
 
     @torch.no_grad()
     def step(self, closure=None):
@@ -61,12 +59,12 @@ class SC_RMSprop(Optimizer):
 
                 # State initialization
                 if len(state) == 0:
-                    state['step'] = 0
+                    state['step'] = 1
                     state['square_avg'] = torch.zeros_like(p, memory_format=torch.preserve_format)
 
                 square_avg = state['square_avg']
                 alpha = group['alpha']
-                beta = 1 - alpha.mul(1/state['step'])
+                beta = 1 - alpha*(1/state['step'])
 
                 state['step'] += 1
 
@@ -80,11 +78,10 @@ class SC_RMSprop(Optimizer):
 
                 avg = square_avg.add(eps_replaced)
                 lr = group['lr']
-                lr.mul_(1/state['step'])
                 p.addcdiv_(grad, avg, value=-lr)
         return loss
 
-class SC_Adagrad(Optimizer):
+class SC_Adagrad(torch.optim.Optimizer):
 
     def __init__(self, params, lr=1e-2, eps1=0.1, eps2=0.1, weight_decay=0):
         if not 0.0 <= lr : raise ValueError("Invalid learning rate: {}".format(lr))
@@ -93,10 +90,10 @@ class SC_Adagrad(Optimizer):
         if not 0.0 <= weight_decay : raise ValueError("Invalid weight_decay value: {}".format(weight_decay))
         
         defaults = dict(lr=lr, eps1=eps1, eps2=eps2, weight_decay=weight_decay)
-        super(RMSprop, self).__init__(params, defaults)
+        super(SC_Adagrad, self).__init__(params, defaults)
 
     def __setstate__(self, state):
-        super(RMSprop, self).__setstate__(state)
+        super(SC_Adagrad, self).__setstate__(state)
 
     @torch.no_grad()
     def step(self, closure=None):
@@ -114,7 +111,7 @@ class SC_Adagrad(Optimizer):
 
                 # State initialization
                 if len(state) == 0:
-                    state['step'] = 0
+                    state['step'] = 1
                     state['square_avg'] = torch.zeros_like(p, memory_format=torch.preserve_format)
 
                 square_avg = state['square_avg']
@@ -130,7 +127,6 @@ class SC_Adagrad(Optimizer):
 
                 avg = square_avg.add(eps_replaced)
                 lr = group['lr']
-                lr.mul_(1/state['step'])
                 p.addcdiv_(grad, avg, value=-lr)
 
         return loss

@@ -1,7 +1,7 @@
 import csv 
 import torch
 import torch.nn
-from optimzers import scOptimzers 
+from optimizers import scOptimizers 
 import torchvision 
 from torchvision import datasets, transforms 
 import model as M
@@ -44,13 +44,12 @@ def get_optimizer(params, name) :
   optimizers = {
       "adam" : torch.optim.Adam(params),
       "amsgrad" : torch.optim.Adam(params, amsgrad = True), 
-      "scrms" : scOptimzers.SC_RMSprop(params), 
-      "scadagrad" : scOptimzers.SC_Adagrad(params), 
-      "ogd" : scOptimzers.SC_SGD(params),
+      "scrms" : scOptimizers.SC_RMSprop(params), 
+      "scadagrad" : scOptimizers.SC_Adagrad(params), 
+      "ogd" : scOptimizers.SC_SGD(params),
       "adamnc" : "ToBeDone",
-      "sadam" : "ToBeDone" 
+      "sadam" : scOptimizers.SAdam(params)
   } 
-  ## Sadam Optimizer to be given here later 
   return optimizers[name]
 
 def write_details(loss, acc, filename) : 
