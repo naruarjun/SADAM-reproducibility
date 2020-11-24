@@ -2,14 +2,15 @@ import math
 import torch 
 
 class SC_SGD(torch.optim.Optimizer) :
-    def __init__(self, params, lr=1e-3, eps=1e-6, wt_decay=0.0, correct_bias=True) :
+    def __init__(self, params, convex = False, lr=1e-2, eps=1e-6, wt_decay=0.0, correct_bias=True) :
 
         if lr < 0.0 : raise ValueError("Invalid LR {} Allowed >= 0.0".format(lr))
         if not eps >= 0.0 : raise ValueError("Invalid epsilon {} Allowed >= 0.0".format(eps))
 
-        defaults = dict(steps = 0,lr=lr, eps=eps, weight_decay=wt_decay, correct_bias=correct_bias)
+        defaults = dict(lr=lr, eps=eps, weight_decay=wt_decay, correct_bias=correct_bias, convex = convex)
         super(SC_SGD, self).__init__(params, defaults)
 
+    @torch.no_grad()
     def step(self, closure=None) :
         loss = None
         if closure is not None :
@@ -20,10 +21,18 @@ class SC_SGD(torch.optim.Optimizer) :
             for p in group['params'] :
                 if p.grad is None : continue
                 grad = p.grad
+                state = self.state[p]
 
-                group['steps'] += 1 
-                alpha = -group['lr']/math.sqrt(group['steps'] + group['eps'])
-                p.add_(grad, alpha=alpha)
+                # State initialization
+                if len(state) == 0:
+                    state['step'] = 1
+
+                state['step'] += 1 
+                if group['convex'] : 
+                    alpha = group['lr']/(state['steps'] + group['eps'])
+                else : 
+                    alpha = group['lr']
+                p.add_(grad, alpha = -alpha)
 
         return loss 
 
