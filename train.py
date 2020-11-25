@@ -30,6 +30,7 @@ parser.add_argument('--log_dir', type = str, default = 'logs')
 parser.add_argument('--model', type = str, default = 'nn')
 parser.add_argument('--loss', type = str, default = 'entropy')
 parser.add_argument('--dataset', type = str, default = 'mnist')
+parser.add_argument('--convex', type = str2bool, default = False, help = 'Whether loss fn is convex or not')
 parser.add_argument('--optimizer', type = str, default = 'adam')
 
 args = parser.parse_args()
@@ -40,7 +41,7 @@ lossfn = PT.get_loss(args.loss)
 train_loader, test_loader, input_size, num_classes, channels = PT.get_dataset(args.dataset, args.batch_size) 
 
 model = PT.get_model(args.model, input_size, num_classes, channels)
-optimizer = PT.get_optimizer(list(model.parameters()), args.optimizer) 
+optimizer = PT.get_optimizer(list(model.parameters()), args.optimizer, args.convex) 
 model.to(device) 
 
 if args.load_weights : 
