@@ -1,5 +1,6 @@
 import os
 import torch
+import wandb 
 import torch.cuda
 import torch.nn
 import torchvision 
@@ -34,6 +35,13 @@ parser.add_argument('--convex', type = str2bool, default = False, help = 'Whethe
 parser.add_argument('--optimizer', type = str, default = 'adam')
 
 args = parser.parse_args()
+wandb.init(project = 'sadam') 
+
+config = wandb.config          # Initialize config
+config.batch_size =  args.batch_size         # input batch size for training (default: 64)
+config.test_batch_size = args.batch_size    # input batch size for testing (default: 1000)
+config.epochs = args.epochs             # number of epochs to train (default: 10)
+config.log_interval = 10     # how many batches to wait before logging training status
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") 
 safe_device = torch.device("cpu") 
@@ -47,12 +55,10 @@ model.to(device)
 if args.load_weights : 
     model.load_state_dict(torch.load(args.load_file))
 
-### Training Code to be written 
-epoch_loss, epoch_accuracy = [], []
-for epoch in tqdm(range(int(args.epochs))) :
-    best_accuracy, curr_loss = 0, 0 
-    
+wandb.watch(model, log="all") 
+for epoch in tqdm(range(int(args.epochs))) : 
     for iteration, data in tqdm(enumerate(train_loader)) :
+
         images, labels = data[0].to(device), data[1].to(device)
         optimizer.zero_grad()
         outputs = model(images)
@@ -70,17 +76,13 @@ for epoch in tqdm(range(int(args.epochs))) :
                 # for gpu, bring the predicted and labels back to cpu for python operations to work
                 labelsT = labelsT.to(safe_device)  
                 correct = correct + (predicted == labelsT).sum()
+                lossTest = lossfn(outputs, labelsT) 
             accuracy = 100 * correct/total
             print("Iteration {}. Loss: {}. Accuracy: {}.".format(iteration, loss.item(), accuracy))
-            if accuracy > best_accuracy :
-                best_accuracy, curr_loss = accuracy, loss.item()
-
-    epoch_loss.append(curr_loss)
-    epoch_accuracy.append(best_accuracy)
-
-    if epoch % 15 == 0 : ## Save the weights every 15 epochs 
+            wandb.log({"Loss" : lossTest.item(), "Accuracy" :  accuracy})
+     
+    if epoch % 20 == 0 : ## Save the weights every 15 epochs 
         torch.save(model.state_dict(), os.path.join(args.log_dir, "wts" + str(epoch) + ".pth"))
-        print("Weights saved at epoch number", epoch) 
+        wandb.save("wts" + str(epoch) + ".npy")
 
-PT.write_details(epoch_loss, epoch_accuracy, args.details_file)
-print(" Exiting now ") 
+wandb.save("wtsFinal.npy")
