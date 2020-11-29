@@ -26,7 +26,6 @@ parser.add_argument('--batch_size', type = int, default = 64)
 parser.add_argument('--load_weights', type = str2bool, default = False, help = 'Load previous weights or not')
 parser.add_argument('--load_file', type = str, default = 'dne.pth')
 parser.add_argument('--details_file', type = str, default = 'LossAccuracy.csv', help = 'Save values for plotting later')
-parser.add_argument('--log_dir', type = str, default = 'logs')
 
 parser.add_argument('--model', type = str, default = 'nn')
 parser.add_argument('--loss', type = str, default = 'entropy')
@@ -82,7 +81,6 @@ for epoch in tqdm(range(int(args.epochs))) :
             wandb.log({"Loss" : lossTest.item(), "Accuracy" :  accuracy})
      
     if epoch % 20 == 0 : ## Save the weights every 15 epochs 
-        torch.save(model.state_dict(), os.path.join(args.log_dir, "wts" + str(epoch) + ".pth"))
         wandb.save("wts" + str(epoch) + ".npy")
 
 wandb.save("wtsFinal.npy")

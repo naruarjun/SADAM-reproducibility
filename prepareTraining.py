@@ -1,7 +1,7 @@
 import csv 
 import torch
 import torch.nn
-from optimizers import scOptimizers 
+import custom_optimizers as OP
 import torchvision 
 from torchvision import datasets, transforms 
 import model as M
@@ -20,8 +20,12 @@ def get_dataset(name, batchsize = 64) :
       "cifar10" : (32, 10, 3) , ## 32*32  
       "cifar100" : (32, 100, 3) # 32*32, 100 classes
   } 
-  trainset = loaderDict[name](root = './data' + name, train=True, transform=transform, download=False)
-  testset = loaderDict[name](root = './data' + name, train=False, transform=transform, download=False)
+  try : 
+      trainset = loaderDict[name](root = './data' + name, train=True, transform=transform, download=False)
+      testset = loaderDict[name](root = './data' + name, train=False, transform=transform, download=False)
+  except Exception as e : 
+      trainset = loaderDict[name](root = './data' + name, train=True, transform=transform, download=True)
+      testset = loaderDict[name](root = './data' + name, train=False, transform=transform, download=True)
   
   trainloader = torch.utils.data.DataLoader(trainset, batch_size=batchsize, shuffle=True)  
   testloader = torch.utils.data.DataLoader(testset, batch_size=batchsize, shuffle=False)
@@ -44,10 +48,10 @@ def get_optimizer(params, name, convex = False) :
   optimizers = {
       "adam" : torch.optim.Adam(params),
       "amsgrad" : torch.optim.Adam(params, amsgrad = True), 
-      "scrms" : scOptimizers.SC_RMSprop(params, convex), 
-      "scadagrad" : scOptimizers.SC_Adagrad(params, convex), 
-      "ogd" : scOptimizers.SC_SGD(params, convex),
-      "sadam" : scOptimizers.SAdam(params)
+      "scrms" : OP.SC_RMSprop(params, convex), 
+      "scadagrad" : OP.SC_Adagrad(params, convex), 
+      "ogd" : OP.SC_SGD(params, convex),
+      "sadam" : OP.SAdam(params)
   } 
   return optimizers[name]
 
