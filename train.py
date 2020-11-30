@@ -20,13 +20,15 @@ def str2bool(v):
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--epochs', type = int, default = 200)
+parser.add_argument('--epochs', type = int, default = 100)
 parser.add_argument('--batch_size', type = int, default = 64)
 
 parser.add_argument('--load_weights', type = str2bool, default = False, help = 'Load previous weights or not')
 parser.add_argument('--load_file', type = str, default = 'dne.pth')
 parser.add_argument('--details_file', type = str, default = 'LossAccuracy.csv', help = 'Save values for plotting later')
 
+parser.add_argument('--lr', type = int, default = 0.001)
+parser.add_argument('--decay', type = str2bool, default = False, help = 'Whether Decay for LR is to be done')
 parser.add_argument('--model', type = str, default = 'nn')
 parser.add_argument('--loss', type = str, default = 'entropy')
 parser.add_argument('--dataset', type = str, default = 'mnist')
@@ -48,15 +50,16 @@ lossfn = PT.get_loss(args.loss)
 train_loader, test_loader, input_size, num_classes, channels = PT.get_dataset(args.dataset, args.batch_size) 
 
 model = PT.get_model(args.model, input_size, num_classes, channels)
-optimizer = PT.get_optimizer(list(model.parameters()), args.optimizer, args.convex) 
+optimizer = PT.get_optimizer(list(model.parameters()), args.optimizer, args.lr, args.convex) 
+scheduler = torch.optim.lr_scheduler.StepLR(optimizer=optimizer, step_size=25, gamma=0.7)
 model.to(device) 
 
 if args.load_weights : 
     model.load_state_dict(torch.load(args.load_file))
-
 wandb.watch(model, log="all") 
+
 for epoch in tqdm(range(int(args.epochs))) : 
-    for iteration, data in tqdm(enumerate(train_loader)) :
+    for iteration, data in enumerate(train_loader) :
 
         images, labels = data[0].to(device), data[1].to(device)
         optimizer.zero_grad()
@@ -64,21 +67,23 @@ for epoch in tqdm(range(int(args.epochs))) :
         loss = lossfn(outputs, labels)
         loss.backward()
         optimizer.step()
+        if args.decay and epoch % 2 == 0 : 
+            scheduler.step() 
 
-        if iteration % 500 == 0 : # Calculate Accuracy
-            correct, total = 0, 0
-            for imagesT, labelsT in test_loader :
-                imagesT, labelsT = imagesT.to(device), labelsT.to(device)
-                outputs = model(imagesT)
-                _, predicted = torch.max(outputs.data, 1)
-                total = total + labels.size(0)
-                # for gpu, bring the predicted and labels back to cpu for python operations to work
-                labelsT = labelsT.to(safe_device)  
-                correct = correct + (predicted == labelsT).sum()
-                lossTest = lossfn(outputs, labelsT) 
-            accuracy = 100 * correct/total
-            print("Iteration {}. Loss: {}. Accuracy: {}.".format(iteration, loss.item(), accuracy))
-            wandb.log({"Loss" : lossTest.item(), "Accuracy" :  accuracy})
+    correct, total = 0, 0
+    for imagesT, labelsT in test_loader :
+        imagesT, labelsT = imagesT.to(device), labelsT.to(device)
+        outputs = model(imagesT)
+        _, predicted = torch.max(outputs.data, 1)
+        total = total + labelsT.size(0)
+        # for gpu, bring the predicted and labels back to cpu for python operations to work
+        labelsTest = labelsT.to(safe_device)  
+        predicted = predicted.to(safe_device) 
+        correct = correct + (predicted == labelsTest).sum()
+        lossTest = lossfn(outputs, labelsT) 
+
+    accuracy = 100 * correct/total
+    wandb.log({"Loss" : lossTest.item(), "Accuracy" :  accuracy})
      
     if epoch % 20 == 0 : ## Save the weights every 15 epochs 
         wandb.save("wts" + str(epoch) + ".npy")

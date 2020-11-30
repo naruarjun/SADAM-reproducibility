@@ -43,15 +43,16 @@ def get_model(name, input_size, num_classes, channels) :
 def get_loss(losstype) : 
   return torch.nn.CrossEntropyLoss() 
 
-def get_optimizer(params, name, convex = False) : 
+def get_optimizer(params, name, lr, convex = False) : 
   assert name in ["adam", "adamnc", "sadam", "amsgrad", "scrms", "scadagrad", "ogd"], "Unknown Optimization"
+  
   optimizers = {
-      "adam" : torch.optim.Adam(params),
-      "amsgrad" : torch.optim.Adam(params, amsgrad = True), 
-      "scrms" : OP.SC_RMSprop(params, convex), 
-      "scadagrad" : OP.SC_Adagrad(params, convex), 
-      "ogd" : OP.SC_SGD(params, convex),
-      "sadam" : OP.SAdam(params)
+      "adam" : torch.optim.Adam(params, lr=lr),
+      "amsgrad" : torch.optim.Adam(params, lr=lr, amsgrad = True), 
+      "scrms" : OP.SC_RMSprop(params, lr=lr, convex=convex), 
+      "scadagrad" : OP.SC_Adagrad(params, lr=lr, convex=convex), 
+      "ogd" : OP.SC_SGD(params, convex, lr=lr),
+      "sadam" : OP.SAdam(params, lr=lr)
   } 
   return optimizers[name]
 
