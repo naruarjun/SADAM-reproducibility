@@ -27,7 +27,7 @@ parser.add_argument('--load_weights', type = str2bool, default = False, help = '
 parser.add_argument('--load_file', type = str, default = 'dne.pth')
 parser.add_argument('--details_file', type = str, default = 'LossAccuracy.csv', help = 'Save values for plotting later')
 
-parser.add_argument('--lr', type = int, default = 0.001)
+parser.add_argument('--lr', type = float, default = 0.001)
 parser.add_argument('--decay', type = str2bool, default = False, help = 'Whether Decay for LR is to be done')
 parser.add_argument('--model', type = str, default = 'nn')
 parser.add_argument('--loss', type = str, default = 'entropy')
