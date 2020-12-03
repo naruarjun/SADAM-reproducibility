@@ -19,6 +19,13 @@ def str2bool(v):
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
+def getNumCorrect(correct, outputs, labels) : 
+    ## For computing Accuracy 
+    _, predicted = torch.max(outputs.data, 1)
+    labelsTemp = labels.to(safe_device)  
+    predicted = predicted.to(safe_device) 
+    return correct + (predicted == labelsTemp).sum().item() 
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--epochs', type = int, default = 100)
 parser.add_argument('--batch_size', type = int, default = 64)
@@ -58,32 +65,44 @@ if args.load_weights :
     model.load_state_dict(torch.load(args.load_file))
 wandb.watch(model, log="all") 
 
-for epoch in tqdm(range(int(args.epochs))) : 
-    for iteration, data in enumerate(train_loader) :
 
+for epoch in tqdm(range(int(args.epochs))) : 
+    correct, total, trainloss = 0, 0, 0.0
+    for iteration, data in enumerate(train_loader) :
+        ## Get Model Output 
         images, labels = data[0].to(device), data[1].to(device)
         optimizer.zero_grad()
         outputs = model(images)
+
+        ## For computing Accuracy 
+        total += labels.size(0)
+        correct = getNumCorrect(correct, outputs, labels) 
+
+        ## Compute Loss 
         loss = lossfn(outputs, labels)
+        trainloss += loss.item() 
         loss.backward()
+
+        ## Optimizer Step and scheduler step 
         optimizer.step()
         if args.decay and epoch % 2 == 0 : 
             scheduler.step() 
+    trainaccuracy = 100 * correct/total
 
-    correct, total = 0, 0
+    correct, total, testloss = 0, 0, 0.0
     for imagesT, labelsT in test_loader :
+        ## Get Model output 
         imagesT, labelsT = imagesT.to(device), labelsT.to(device)
-        outputs = model(imagesT)
-        _, predicted = torch.max(outputs.data, 1)
-        total = total + labelsT.size(0)
-        # for gpu, bring the predicted and labels back to cpu for python operations to work
-        labelsTest = labelsT.to(safe_device)  
-        predicted = predicted.to(safe_device) 
-        correct = correct + (predicted == labelsTest).sum()
-        lossTest = lossfn(outputs, labelsT) 
+        outputsT = model(imagesT)
 
-    accuracy = 100 * correct/total
-    wandb.log({"Loss" : lossTest.item(), "Accuracy" :  accuracy})
+        ## For calculating metrics to log 
+        total += labelsT.size(0)
+        correct = getNumCorrect(correct, outputsT, labelsT) 
+        lossTest = lossfn(outputsT, labelsT) 
+        testloss += lossTest.item() 
+
+    testaccuracy = 100 * correct/total
+    wandb.log({"TrainLoss" : trainloss, "TestLoss" : testloss, "TrainAccuracy" : trainaccuracy, "TestAccuracy" :  testaccuracy})
      
     if epoch % 20 == 0 : ## Save the weights every 15 epochs 
         wandb.save("wts" + str(epoch) + ".npy")
