@@ -19,7 +19,19 @@ def getNumCorrect(correct, outputs, labels) :
 def get_dataset(name, batchsize = 64) : 
   """ Function to import datasets to be used for training """ 
   assert name in ["mnist","cifar10", "cifar100"], "Improper dataset name given"
-  transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,)),])
+  dataset_stats = {
+    "mnist" : ((0.5,), (0.5,)), 
+    "mnist" : ((0.5,), (0.5,)), 
+    "cifar100" : ((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
+  }
+  train_transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize(*dataset_stats[name])])  
+  if name == "cifar100" : 
+    train_transform = transforms.Compose([transforms.RandomCrop(32, padding=4,padding_mode='reflect'), 
+                           transforms.RandomHorizontalFlip(), 
+                           transforms.ToTensor(), 
+                           transforms.Normalize(*dataset_stats[name],inplace=True)])
+  test_transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize(*dataset_stats[name])])  
+
   loaderDict = {
       "mnist" : datasets.MNIST , 
       "cifar10" : datasets.CIFAR10 , 
@@ -31,11 +43,11 @@ def get_dataset(name, batchsize = 64) :
       "cifar100" : (32, 100, 3) # 32*32, 100 classes
   } 
   try : 
-      trainset = loaderDict[name](root = './data' + name, train=True, transform=transform, download=False)
-      testset = loaderDict[name](root = './data' + name, train=False, transform=transform, download=False)
+      trainset = loaderDict[name](root = './data' + name, train=True, transform=train_transform, download=False)
+      testset = loaderDict[name](root = './data' + name, train=False, transform=test_transform, download=False)
   except Exception as e : 
-      trainset = loaderDict[name](root = './data' + name, train=True, transform=transform, download=True)
-      testset = loaderDict[name](root = './data' + name, train=False, transform=transform, download=True)
+      trainset = loaderDict[name](root = './data' + name, train=True, transform=train_transform, download=True)
+      testset = loaderDict[name](root = './data' + name, train=False, transform=test_transform, download=True)
   
   torch.backends.cudnn.deterministic = True
   torch.manual_seed(1)
@@ -58,16 +70,16 @@ def get_model(name, input_size, num_classes, channels) :
 def get_loss(losstype) : 
   return torch.nn.CrossEntropyLoss() 
 
-def get_optimizer(params, name, lr, convex = False) : 
+def get_optimizer(params, name, lr, convex = False, decay = 1e5) : 
   assert name in ["adam", "adamnc", "sadam", "amsgrad", "scrms", "scadagrad", "ogd"], "Unknown Optimization"
   
   optimizers = {
-      "adam" : torch.optim.Adam(params, lr=lr),
-      "amsgrad" : torch.optim.Adam(params, lr=lr, amsgrad = True), 
-      "scrms" : OP.SC_RMSprop(params, lr=lr, convex=convex), 
-      "scadagrad" : OP.SC_Adagrad(params, lr=lr, convex=convex), 
-      "ogd" : OP.SC_SGD(params, convex, lr=lr),
-      "sadam" : OP.SAdam(params, lr=lr)
+      "adam" : torch.optim.Adam(params, lr=lr, weight_decay=decay),
+      "amsgrad" : torch.optim.Adam(params, lr=lr, amsgrad=True, weight_decay=decay), 
+      "scrms" : OP.SC_RMSprop(params, lr=lr, convex=convex, weight_decay=decay), 
+      "scadagrad" : OP.SC_Adagrad(params, lr=lr, convex=convex, weight_decay=decay), 
+      "ogd" : OP.SC_SGD(params, convex, lr=lr, weight_decay=decay),
+      "sadam" : OP.SAdam(params, lr=lr, weight_decay=decay)
   } 
   return optimizers[name]
 
@@ -82,10 +94,8 @@ def train_model(model, lossfn, device, epochs, optimizer, train_loader, test_loa
             images, labels = data[0].to(device), data[1].to(device)
             if reshape : 
                 images = images.reshape((images.shape[0], -1))
-            model.eval() 
             optimizer.zero_grad()
             outputs = model(images)
-            model.train()
 
             ## For computing Accuracy 
             total += labels.size(0) ## batch size added, at each step

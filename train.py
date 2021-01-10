@@ -29,7 +29,7 @@ parser.add_argument('--load_file', type = str, default = 'dne.pth')
 parser.add_argument('--details_file', type = str, default = 'LossAccuracy.csv', help = 'Save values for plotting later')
 
 parser.add_argument('--lr', type = float, default = 0.001)
-parser.add_argument('--decay', type = str2bool, default = False, help = 'Whether Decay for LR is to be done')
+parser.add_argument('--decay', type = float, default = 1e2, help = 'Whether Decay for LR is to be done')
 parser.add_argument('--model', type = str, default = 'nn')
 parser.add_argument('--loss', type = str, default = 'entropy')
 parser.add_argument('--dataset', type = str, default = 'mnist')
@@ -51,17 +51,18 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 train_loader, test_loader, inpsize, classes, channels, instances = PT.get_dataset(args.dataset, args.batch_size) 
 
 model = PT.get_model(args.model, inpsize, classes, channels)
-optimizer = PT.get_optimizer(list(model.parameters()), args.optimizer, args.lr, args.convex) 
-model.to(device) 
+optimizer = PT.get_optimizer(list(model.parameters()), args.optimizer, args.lr, args.convex, args.decay) 
+model.to(device)
 
 if args.model == 'nn' :  
+    wandb.watch(model, log="all")
     _ = PT.train_model(model, lossfn, device, args.epochs, optimizer, train_loader, test_loader, False)
     wandb.save("wtsFinal.npy")
     
 elif args.model == "logistic":
-  optimizer = torch.optim.Adam(list(model.parameters()), lr=0.001, weight_decay = 1e-5)
+  optimizer = torch.optim.Adam(list(model.parameters()), lr=0.001, weight_decay=args.decay)
   model = PT.train_model(model, lossfn, device, args.epochs, optimizer, train_loader) 
-
+ 
   batch_size = instances // iterations 
   train_loader, _, inpsize, classes, channels, _ = PT.get_dataset(args.dataset, batch_size) 
   optimal_loss = PT.regret_calculation(train_loader, model, optimizer, lossfn, device, iterations, args.optimizer, args.convex, inpsize, classes, channels)
