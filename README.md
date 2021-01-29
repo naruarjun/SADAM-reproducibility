@@ -71,7 +71,6 @@ Code to import the optimizers. Once the optimizers are imported, one can use the
 
 ## Results 
 
-Add links to all of our wandb projects, and our report as well. 
 Below are the links to our corresponsing projects on Weights and Biases
 
 <a href="https://wandb.ai/naruarjun/sadam-mnist-final">MNIST regret analysis</a>
@@ -120,6 +119,6 @@ Yash Raj Sarrof [@yashYRS](https://twitter.com/yashYRS) - yashrajsarrof18121998@
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements
 
-* []()
-* []()
+* [The Authors of SAdamGuanghui Wang, Shiyin Lu, Quan Cheng, Wei-wei Tu, Lijun Zhang](https://openreview.net/forum?id=rye5YaEtPr)
+* [The ML Reproducibility Challenge 2020 Organising committee](https://paperswithcode.com/rc2020)
 * []()
