@@ -194,10 +194,6 @@ class SAdam(torch.optim.Optimizer):
                 xi_1, xi_2 = group['xi_1'], group['xi_2']
 
                 state['step'] += 1
-                if group['convex'] : 
-                    lr = group['lr']/(state['step'])# + group['eps'])
-                else : 
-                    lr = group['lr']
 
                 if group['weight_decay'] != 0:
                     grad = grad.add(p, alpha=group['weight_decay'])
