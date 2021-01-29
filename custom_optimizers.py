@@ -29,7 +29,6 @@ class SC_SGD(torch.optim.Optimizer) :
 
                 state['step'] += 1 
 
-                #state['step'] += 1 
                 if group['convex'] : 
                     alpha = group['lr']/(state['step'])# + group['eps'])
                 else : 
@@ -74,14 +73,14 @@ class SC_RMSprop(torch.optim.Optimizer):
 
                 # State initialization
                 if len(state) == 0:
-                    state['step'] = 0
+                    state['step'] = 1
                     state['square_avg'] = torch.zeros_like(p, memory_format=torch.preserve_format)
 
                 square_avg = state['square_avg']
                 alpha = group['alpha']
                 beta = 1 - alpha*(1/state['step'])
                 
-                state['step'] += 1
+                
                 if group['convex'] : 
                     lr = group['lr']/(state['step'])# + group['eps'])
                     eps2 = 0.1
@@ -94,9 +93,12 @@ class SC_RMSprop(torch.optim.Optimizer):
 
                 square_avg.mul_(beta).addcmul_(grad, grad, value=1 - beta)
                 eps_replaced = torch.exp(-square_avg.mul(group['eps1']*state['step']))
-                eps_replaced.mul_(eps2)
                 avg = eps_replaced.add(square_avg, alpha = state['step'])
                 
+                eps_replaced.mul_(eps2)
+                avg = square_avg.add(eps_replaced/state['step'])
+                state['step'] += 1
+
                 p.addcmul_(grad, 1/avg, value=-lr)
         return loss
 
@@ -130,10 +132,10 @@ class SC_Adagrad(torch.optim.Optimizer):
 
                 # State initialization
                 if len(state) == 0:
-                    state['step'] = 0
+                    state['step'] = 1
                     state['square_avg'] = torch.zeros_like(p, memory_format=torch.preserve_format)
 
-                state['step'] += 1
+                
                 if group['convex'] : 
                     lr = group['lr']/(state['step'])# + group['eps'])
                     eps2 = 0.1
@@ -142,7 +144,7 @@ class SC_Adagrad(torch.optim.Optimizer):
                     eps2 = 1
 
                 square_avg = state['square_avg']
-                
+                state['step'] += 1
 
                 if group['weight_decay'] != 0:
                     grad = grad.add(p, alpha=group['weight_decay'])

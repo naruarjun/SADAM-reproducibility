@@ -88,7 +88,7 @@ def get_optimizer(params, name, lr, convex = False, decay = 1e5) :
   return optimizers[name]
 
 def train_model(model, lossfn, device, epochs, optimizer, train_loader, test_loader = "", reshape = True) :
-
+    model.train()
     logging_dict = {} 
     for epoch in tqdm(range(int(epochs))) :
         correct, total, epoch_loss = 0, 0, 0.0
