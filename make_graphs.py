@@ -1,3 +1,4 @@
+import argparse 
 import pandas as pd 
 import matplotlib.pyplot as plt
 
@@ -56,22 +57,23 @@ def make_image(filename, plot_columns, names, dataset, ylabel_name, xlabel_name)
 	plt.savefig(filename[:-3] + 'png')
 	plt.show()
 
-# # For CIFAR 10 Regret
-# names = ["Amsgrad", "SAdam", "Adam", "SC-RMSprop", "SC-Adagrad", "OGD"]
-# # For Cifar 10, 4 layer 
-# names = ["AmsGrad", "Sadam", "Adam", "SCRms", "SCAdagrad", "OGD"]
-# # For Cifar 100, 4 layer 
-names = ["AmsGrad", "Sadam", "Adam", "SC-RMS", "Sc-Adagrad", "OGD"]
-# and ResNet  
-names = ["AmsGrad", "Sadam", "Adam", "SC-RMS", "SC-Adagrad", "OGD"]
-# For MNIST 
-names = ["Amsgrad", "Sadam", "Adam", "SCRms", "SCadagrad", "OGD"]
-## For Regret 
-# dataset, plot_columns = get_graph_from_csv('mnist.csv', names, 'DatasetProportion')
-# make_image(plot_columns, names, dataset, "Regret", "Dataset Proportion")
 
-## For 4 layer and ResNet 
-filename = 'mnistTrainLoss.csv'
-dataset, plot_columns = deep_get_graph_from_csv(filename, names, 'Step', "Loss")
-make_image(filename, plot_columns, names, dataset, "Train Loss", "Number of Epochs")
-#make_image(plot_columns, names, dataset, "Train Loss", "Number of Epochs")
+
+if __name__ == '__main__':
+	parser = argparse.ArgumentParser()
+	## Denotes the names of the runs, CSV files are downloaded from the Wandb page 
+	names = ["AmsGrad", "Sadam", "Adam", "SC-RMS", "Sc-Adagrad", "OGD"]
+
+
+	parser.add_argument("--filename", help="File path", required=True, type=str)
+	parser.add_argument("--xaxis_type", help="Step / Dataset Proportion", default="Step", type=str)
+	parser.add_argument("--xaxis_name", help="Graph give the name of the X axis", default="Train Loss", type=str)
+	parser.add_argument("--yaxis_name", help="Graph give the name of the Y axis", default="Step", type=str)
+	parser.add_argument("--find_value", help = "Accuracy or Loss depending on the graph to be plotted", default = "Accuracy", type = str)
+
+
+	args = parser.parse_args()
+	dataset, plot_columns = deep_get_graph_from_csv(args.filename, names, args.xaxis_type, args.find_value)
+	make_image(filename, plot_columns, names, dataset, args.yaxis_name, args.xaxis_name)
+
+
