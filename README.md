@@ -46,6 +46,26 @@ as part of the ML Reproducibility Challenge 2020
 Here give a listing of all the command line arguments, for train.py 
 and then write a line about the fact that samples are shown below. 
 
+Arguments:
+```
+ --dataset 	        The dataset to be used in the experiment  (mnist(default)/cifar10/cifar100) 
+
+ -lr                Learning rate for the optimizer           (default - 1e-3)
+ 
+ -batch_size        Batch size for dataloader                 (default - 64)
+ 
+ --model            Model architecture                        (logistic(default)/nn/resnet18)
+ 
+ --epochs           No. of epochs to train the model          (default - 100)
+ 
+ --optimizer        Optimizer to be used                      (adam(default)/amsgrad/scrms/scadagrad/ogd/sadam)
+ 
+ --convex           To use convex version of optimizer or not (True/False(default))
+ 
+ --decay            Regularization Factor                     (Default - 1e-2)
+ 
+```
+
 ### Neural Network Experiments
 A Sample way to execute is given below, however the parameters can be varied as per the user's wish, to generate all kinds of permutations with models, hyperparameters, datasets, optimizers and batch sizes. 
 ```sh
