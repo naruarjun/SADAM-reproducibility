@@ -140,7 +140,7 @@ def train_model(model, lossfn, device, epochs, optimizer, train_loader, test_loa
     return model
 
     
-def regret_calculation(train_loader, modelT, optimizerT, lossfn, device, iterations, optim, convex, inpsize, classes, channels) :
+def regret_calculation(train_loader, modelT, optimizerT, lossfn, device, iterations, optim, convex, inpsize, classes, channels, decay=0) :
 
     ## Params initialized 
     modelE, optimizerE, logging = [], [], {} 
@@ -157,7 +157,7 @@ def regret_calculation(train_loader, modelT, optimizerT, lossfn, device, iterati
         model = get_model("logistic", inpsize, classes, channels)
         model.to(device) 
         modelE.append(model) 
-        optimizerE.append(get_optimizer(list(model.parameters()), optim, lr, convex))
+        optimizerE.append(get_optimizer(list(model.parameters()), optim, lr, convex, decay))
         running_regret_sum.append(0)
     for itern, data in enumerate(train_loader) :
         images, labels = data[0].to(device), data[1].to(device)
