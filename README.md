@@ -50,7 +50,7 @@ Arguments:
 ```
  --dataset 	        The dataset to be used in the experiment  (mnist(default)/cifar10/cifar100) 
 
- -lr                Learning rate for the optimizer           (default - 1e-3)
+ --lr               Learning rate for the optimizer           (default - 1e-3)
  
  -batch_size        Batch size for dataloader                 (default - 64)
  
