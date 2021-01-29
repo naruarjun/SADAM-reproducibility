@@ -74,7 +74,7 @@ def get_model(name, input_size, num_classes, channels) :
 def get_loss(losstype) : 
   return torch.nn.CrossEntropyLoss() 
 
-def get_optimizer(params, name, lr, convex = False, decay = 1e5) : 
+def get_optimizer(params, name, lr, convex = False, decay = 1e-2) : 
   assert name in ["adam", "adamnc", "sadam", "amsgrad", "scrms", "scadagrad", "ogd"], "Unknown Optimization"
   
   optimizers = {
