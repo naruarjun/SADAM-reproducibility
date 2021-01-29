@@ -38,7 +38,7 @@ parser.add_argument('--optimizer', type = str, default = 'adam')
 
 iterations = 1000
 args = parser.parse_args()
-wandb.init(project = 'sadam') 
+wandb.init(project = args.dataset) 
 
 config = wandb.config          # Initialize config
 config.log_interval = 10     # how many batches to wait before logging training status
@@ -54,15 +54,21 @@ model = PT.get_model(args.model, inpsize, classes, channels)
 optimizer = PT.get_optimizer(list(model.parameters()), args.optimizer, args.lr, args.convex, args.decay) 
 model.to(device)
 
-if args.model == 'nn' :  
-    wandb.watch(model, log="all")
-    _ = PT.train_model(model, lossfn, device, args.epochs, optimizer, train_loader, test_loader, False)
-    wandb.save("wtsFinal.npy")
+  
     
-elif args.model == "logistic":
+if args.model == "logistic":
   optimizer = torch.optim.Adam(list(model.parameters()), lr=0.001, weight_decay=args.decay)
-  model = PT.train_model(model, lossfn, device, args.epochs, optimizer, train_loader) 
+  
+  if args.load_weights : 
+    model = torch.load('model' + args.dataset +'.pt')
+  else : 
+    model = PT.train_model(model, lossfn, device, args.epochs, optimizer, train_loader) 
+    torch.save(model, 'model' + args.dataset + '.pt')
  
   batch_size = instances // iterations 
   train_loader, _, inpsize, classes, channels, _ = PT.get_dataset(args.dataset, batch_size) 
   optimal_loss = PT.regret_calculation(train_loader, model, optimizer, lossfn, device, iterations, args.optimizer, args.convex, inpsize, classes, channels)
+
+else : 
+    wandb.watch(model, log="all")
+    _ = PT.train_model(model, lossfn, device, args.epochs, optimizer, train_loader, test_loader, False)

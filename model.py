@@ -5,8 +5,7 @@ class LogisticRegression(torch.nn.Module) :
     def __init__(self, inputSize, numClasses, channels = 3) :
         super(LogisticRegression, self).__init__()
         self.linear = torch.nn.Sequential(
-              torch.nn.Linear(inputSize*inputSize*channels, numClasses), 
-              torch.nn.Softmax()
+              torch.nn.Linear(inputSize*inputSize*channels, numClasses)
         )
 
     def forward(self, x):
@@ -27,8 +26,7 @@ class Layer4NN(torch.nn.Module) :
         self.dropout2 = torch.nn.Dropout(p=0.5)
 
         self.max_pool = torch.nn.MaxPool2d(kernel_size=(2,2), stride=(2,2))
-        self.relu = torch.nn.ReLU() 
-        self.softmax = torch.nn.Softmax(dim=1) 
+        self.relu = torch.nn.ReLU()  
 
         self.input = inputSize*inputSize
 
@@ -41,5 +39,5 @@ class Layer4NN(torch.nn.Module) :
         x = self.relu(self.fclayer1(x))
         x = self.dropout2(x)
         x = self.fclayer2(x)
-        return self.softmax(x)
+        return x
 

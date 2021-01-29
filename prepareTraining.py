@@ -6,13 +6,15 @@ import torch.nn
 import torchvision 
 from tqdm import tqdm 
 from torchvision import datasets, transforms 
+
+import resnet
 import model as M
 import custom_optimizers as OP
 
 def getNumCorrect(correct, outputs, labels) : 
     ## For computing Accuracy 
     _, predicted = torch.max(outputs.data, 1)
-    labelsTemp = labels.to("cpu")  
+    labelsTemp = labels.to("cpu") 
     predicted = predicted.to("cpu") 
     return correct + (predicted == labelsTemp).sum().item()
 
@@ -21,7 +23,7 @@ def get_dataset(name, batchsize = 64) :
   assert name in ["mnist","cifar10", "cifar100"], "Improper dataset name given"
   dataset_stats = {
     "mnist" : ((0.5,), (0.5,)), 
-    "mnist" : ((0.5,), (0.5,)), 
+    "cifar10" : ((0.5,), (0.5,)), 
     "cifar100" : ((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
   }
   train_transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize(*dataset_stats[name])])  
@@ -61,11 +63,13 @@ def get_dataset(name, batchsize = 64) :
   return trainloader, testloader, input_size, num_classes, channels, len(trainset)
 
 def get_model(name, input_size, num_classes, channels) : 
-  assert name in ["logistic","nn"], "Improper model type given"
-  if name == "logistic" : 
-    return M.LogisticRegression(input_size, num_classes, channels)
-  else : 
-    return M.Layer4NN(input_size, num_classes, channels)
+  assert name in ["logistic","nn", "resnet18"], "Improper model type given"
+  models = {
+    "logistic" : M.LogisticRegression(input_size, num_classes, channels), 
+    "nn" : M.Layer4NN(input_size, num_classes, channels), 
+    "resnet18" : resnet.ResNet18(num_classes=num_classes) ## Only to be trained with CIFAR10 or 100 
+  }
+  return models[name]
 
 def get_loss(losstype) : 
   return torch.nn.CrossEntropyLoss() 
@@ -76,10 +80,10 @@ def get_optimizer(params, name, lr, convex = False, decay = 1e5) :
   optimizers = {
       "adam" : torch.optim.Adam(params, lr=lr, weight_decay=decay),
       "amsgrad" : torch.optim.Adam(params, lr=lr, amsgrad=True, weight_decay=decay), 
-      "scrms" : OP.SC_RMSprop(params, lr=lr, convex=convex, weight_decay=decay), 
-      "scadagrad" : OP.SC_Adagrad(params, lr=lr, convex=convex, weight_decay=decay), 
-      "ogd" : OP.SC_SGD(params, convex, lr=lr, weight_decay=decay),
-      "sadam" : OP.SAdam(params, lr=lr, weight_decay=decay)
+      "scrms" : OP.SC_RMSprop(params, lr=lr, weight_decay=decay, convex=convex), 
+      "scadagrad" : OP.SC_Adagrad(params, lr=lr, weight_decay=decay, convex=convex), 
+      "ogd" : OP.SC_SGD(params, convex=convex, lr=lr, weight_decay=decay),
+      "sadam" : OP.SAdam(params, lr=lr, weight_decay=decay, convex=convex)
   } 
   return optimizers[name]
 
@@ -97,10 +101,6 @@ def train_model(model, lossfn, device, epochs, optimizer, train_loader, test_loa
             optimizer.zero_grad()
             outputs = model(images)
 
-            ## For computing Accuracy 
-            total += labels.size(0) ## batch size added, at each step
-            correct = getNumCorrect(correct, outputs, labels) 
-
             ## Compute Loss 
             loss = lossfn(outputs, labels)
             loss.backward()
@@ -108,6 +108,10 @@ def train_model(model, lossfn, device, epochs, optimizer, train_loader, test_loa
             
             ## Optimizer Step and scheduler step 
             optimizer.step()
+
+            ## For computing Accuracy 
+            total += labels.size(0) ## batch size added, at each step
+            correct = getNumCorrect(correct, outputs, labels)             
 
         train_accuracy = 100*correct/total
         logging_dict["TrainLoss"] = epoch_loss
