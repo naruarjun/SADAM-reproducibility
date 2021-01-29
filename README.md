@@ -86,6 +86,8 @@ Below are the links to our corresponsing projects on Weights and Biases
 
 <a href="https://wandb.ai/yashsarrof/cifar100">CIFAR100 4 layer CNN analysis</a>
 
+<a href="https://wandb.ai/yashsarrof/ResNet">CIFAR10 ResNet-18 analysis</a>
+
 <!-- CONTRIBUTING -->
 ## Contributing
 
