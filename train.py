@@ -57,7 +57,7 @@ model.to(device)
   
     
 if args.model == "logistic":
-  optimizer = torch.optim.Adam(list(model.parameters()), lr=0.001, weight_decay=args.decay)
+  optimizer = torch.optim.Adam(list(model.parameters()), lr=0.001, weight_decay=1e-5)
   
   if args.load_weights : 
     model = torch.load('model' + args.dataset +'.pt')
