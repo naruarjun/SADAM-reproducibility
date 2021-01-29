@@ -74,7 +74,7 @@ A Sample way to execute is given below, however the parameters can be varied as 
 ### Regret Experiments
 All the options mentioned above, can be used to run the regret experiments as well, however the *model* chosen should be *logistic* and *convex* parameter should be *True*. A sample execution is shown below - 
 ```sh
-    python3 train.py --dataset mnist --lr 0.001 --batch_size 64 --decay 1e2 --optimizer adam --epochs 100 --model logistic --convex True
+    python3 train.py --dataset mnist --lr 0.001 --batch_size 64 --decay 1e-2 --optimizer adam --epochs 100 --model logistic --convex True
 ```
 ### Use the Optimizers
 Code to import the optimizers. Once the optimizers are imported, one can use these optimizers, just like the standard ones provided by PyTorch are used with ```optimizer.zero_grad()``` and ```optimizer.step()``` whenever necessary. 
