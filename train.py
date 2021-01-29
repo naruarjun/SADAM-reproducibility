@@ -67,7 +67,7 @@ if args.model == "logistic":
  
   batch_size = instances // iterations 
   train_loader, _, inpsize, classes, channels, _ = PT.get_dataset(args.dataset, batch_size) 
-  optimal_loss = PT.regret_calculation(train_loader, model, optimizer, lossfn, device, iterations, args.optimizer, args.convex, inpsize, classes, channels)
+  optimal_loss = PT.regret_calculation(train_loader, model, optimizer, lossfn, device, iterations, args.optimizer, args.convex, inpsize, classes, channels, args.decay)
 
 else : 
     wandb.watch(model, log="all")
