@@ -43,9 +43,6 @@ as part of the ML Reproducibility Challenge 2020
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-Here give a listing of all the command line arguments, for train.py 
-and then write a line about the fact that samples are shown below. 
-
 Arguments:
 ```
  --dataset 	    The dataset to be used in the experiment  (mnist(default)/cifar10/cifar100) 
@@ -141,4 +138,3 @@ Yash Raj Sarrof [@yashYRS](https://twitter.com/yashYRS) - yashrajsarrof18121998@
 
 * [The Authors of SAdam - Guanghui Wang, Shiyin Lu, Quan Cheng, Wei-wei Tu, Lijun Zhang](https://openreview.net/forum?id=rye5YaEtPr)
 * [The ML Reproducibility Challenge 2020 Organising committee](https://paperswithcode.com/rc2020)
-* []()
