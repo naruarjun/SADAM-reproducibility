@@ -48,7 +48,7 @@ and then write a line about the fact that samples are shown below.
 
 Arguments:
 ```
- --dataset 	     The dataset to be used in the experiment  (mnist(default)/cifar10/cifar100) 
+ --dataset 	    The dataset to be used in the experiment  (mnist(default)/cifar10/cifar100) 
 
  --lr               Learning rate for the optimizer           (default - 1e-3)
  
