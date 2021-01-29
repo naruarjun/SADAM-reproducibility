@@ -119,6 +119,6 @@ Yash Raj Sarrof [@yashYRS](https://twitter.com/yashYRS) - yashrajsarrof18121998@
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements
 
-* [The Authors of SAdamGuanghui Wang, Shiyin Lu, Quan Cheng, Wei-wei Tu, Lijun Zhang](https://openreview.net/forum?id=rye5YaEtPr)
+* [The Authors of SAdam - Guanghui Wang, Shiyin Lu, Quan Cheng, Wei-wei Tu, Lijun Zhang](https://openreview.net/forum?id=rye5YaEtPr)
 * [The ML Reproducibility Challenge 2020 Organising committee](https://paperswithcode.com/rc2020)
 * []()
