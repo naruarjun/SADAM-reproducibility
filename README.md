@@ -1,6 +1,6 @@
 <h3 align="center">SAdam Reproducibility Study</h3>
 
- Reproducibility study carried out on the <a href = "https://openreview.net/forum?id=rye5YaEtPr">SAdam: A Variant of Adam for Strongly Convex Functions </a>, 
+ Reproducibility study carried out on the paper <a href = "https://openreview.net/forum?id=rye5YaEtPr">SAdam: A Variant of Adam for Strongly Convex Functions </a>, 
 as part of the ML Reproducibility Challenge 2020 
     <br />
     <p align = "center"><a href="https://github.com/naruarjun/SADAM-reproducibility/issues">Request Feature/Report Bug</a>
@@ -72,6 +72,14 @@ Code to import the optimizers. Once the optimizers are imported, one can use the
 ## Results 
 
 Add links to all of our wandb projects, and our report as well. 
+Below are the links to our corresponsing projects on Weights and Biases
+
+<a href="https://wandb.ai/naruarjun/sadam-mnist-final">MNIST regret analysis</a>
+<a href="https://wandb.ai/naruarjun/sadam-cifar10-final">CIFAR-10 regret analysis</a>
+<a href="https://wandb.ai/naruarjun/sadam-cifar100-final">CIFAR-100 regret analysis</a>
+<a href="https://wandb.ai/yashsarrof/mnist">MNIST 4 layer CNN analysis</a>
+<a href="https://wandb.ai/yashsarrof/cifar10">CIFAR10 4 layer CNN analysis</a>
+<a href="https://wandb.ai/yashsarrof/cifar100">CIFAR100 4 layer CNN analysis</a>
 <!-- CONTRIBUTING -->
 ## Contributing
 
