@@ -124,15 +124,8 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 
 
-<!-- CONTACT -->
-## Contact
-
-Narayanan Elavathur Ranganatha - [@naruarjun1](https://twitter.com/naruarjun1) - naruarjun@gmail.com
-
-Yash Raj Sarrof [@yashYRS](https://twitter.com/yashYRS) - yashrajsarrof18121998@gmail.com
-
-
-
+<!-- CONTACT ## ContactNarayanan Elavathur Ranganatha - [@naruarjun1](https://twitter.com/naruarjun1) - naruarjun@gmail.com Yash Raj Sarrof [@yashYRS (https://twitter.com/yashYRS) - yashrajsarrof18121998@gmail.com
+-->
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements
 
