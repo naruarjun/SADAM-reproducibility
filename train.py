@@ -25,24 +25,30 @@ def str2bool(v):
 
 
 parser = argparse.ArgumentParser()
+
+
 parser.add_argument('--epochs', type=int, default=100)
 parser.add_argument('--batch_size', type=int, default=64)
-
-parser.add_argument('--load_weights', type=str2bool,
-                    default=False, help='Load previous weights or not')
-parser.add_argument('--load_file', type=str, default='dne.pth')
-parser.add_argument('--details_file', type=str, default='LossAccuracy.csv',
-                    help='Save values for plotting later')
-
 parser.add_argument('--lr', type=float, default=0.001)
-parser.add_argument('--decay', type=float, default=1e-2,
-                    help='Whether Decay for LR is to be done')
 parser.add_argument('--model', type=str, default='nn')
 parser.add_argument('--loss', type=str, default='entropy')
 parser.add_argument('--dataset', type=str, default='mnist')
+parser.add_argument('--optimizer', type=str, default='adam')
+
+parser.add_argument('--load_weights', type=str2bool,
+                    default=False, help='Load previous weights or not')
+
 parser.add_argument('--convex', type=str2bool, default=False,
                     help='Whether loss fn is convex or not')
-parser.add_argument('--optimizer', type=str, default='adam')
+
+parser.add_argument('--decay', type=float, default=1e-2,
+                    help='Whether Decay for LR is to be done')
+
+parser.add_argument('--beta1', type=float, default=0.9,
+                    help='Beta1 Hyperparam for SAdam')
+
+parser.add_argument('--gamma', type=float, default=0.9,
+                    help='Gamma Hyperparam for SAdam')
 
 iterations = 1000
 args = parser.parse_args()
@@ -67,14 +73,14 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 model = PT.get_model(args.model, inpsize, classes, channels)
 optimizer = PT.get_optimizer(
-                list(model.parameters()), args.optimizer,
-                args.lr, args.convex, args.decay)
+                list(model.parameters()), args.optimizer, args.lr,
+                args.convex, args.decay, args.beta1, args.gamma)
 model.to(device)
 
 
 if args.model == "logistic":
     optimizer = torch.optim.Adam(
-                    list(model.parameters()), lr=0.001, weight_decay=1e-2)
+                    list(model.parameters()), lr=0.001, weight_decay=1e-5)
     if args.load_weights:
         model = torch.load('model' + args.dataset + '.pt')
     else:
@@ -88,7 +94,7 @@ if args.model == "logistic":
                                 train_loader, model, optimizer, lossfn,
                                 device, iterations, args.optimizer,
                                 args.convex, inpsize, classes, channels,
-                                args.decay)
+                                args.decay, args.beta1, args.gamma)
 
 else:
     wandb.watch(model, log="all")
