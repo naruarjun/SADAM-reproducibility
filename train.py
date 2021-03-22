@@ -69,7 +69,8 @@ lossfn = PT.get_loss(args.loss)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 (train_loader, test_loader, inpsize,
- classes, channels, instances) = PT.get_dataset(args.dataset, args.batch_size)
+ classes, channels, instances) = PT.get_dataset(args.dataset,
+                                                args.batch_size, args.convex)
 
 model = PT.get_model(args.model, inpsize, classes, channels)
 

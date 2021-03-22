@@ -36,7 +36,16 @@ as part of the ML Reproducibility Challenge 2020
    ```sh
    git clone https://github.com/naruarjun/SADAM-reproducibility.git
    ```
-2. Install the requirements
+2. Install virtualenv
+   ```sh
+   python3 -m pip install --user virtualenv
+   ```
+3. Make a virtual Environnment and activate it
+   ```sh
+   virtualenv /path_to_env
+   source /path_to_env/bin/activate
+   ```
+4. Install the requirements
    ```sh
    pip install -r requirements.txt 
    ```
@@ -61,6 +70,9 @@ Arguments:
  
  --decay            Regularization Factor                     (Default - 1e-2)
  
+ --beta1            Hyperparameter for SAdam                     (Default - 0.9)
+ 
+ --gamma            Hyperparameter for SAdam                     (Default - 0.9) 
 ```
 
 ### Neural Network Experiments
@@ -85,7 +97,8 @@ Code to import the optimizers. Once the optimizers are imported, one can use the
     """
     optimzer = OP.SC_RMSprop(params, lr=lr, weight_decay=decay, convex=convex)
 ```
-
+### PennTree Bank Dataset Language Modelling Experiments 
+We used the source code provided in this [repository](https://github.com/salesforce/awd-lstm-lm), to conduct our perplexity experiments, simply replacing the default optimizers in their processes by our optimizer implementations, as mentioned above. 
 ## Results 
 
 Below are the links to our corresponsing projects on Weights and Biases

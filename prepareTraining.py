@@ -20,31 +20,30 @@ def getNumCorrect(correct, outputs, labels):
     return correct + (predicted == labelsTemp).sum().item()
 
 
-def get_dataset(name, batchsize=64):
+def get_dataset(name, batchsize=64, convex=True):
     # Function to import datasets to be used for training
     assert name in ["mnist", "cifar10", "cifar100"], "Check dataset name"
 
-    dataset_stats = {
-        "mnist": ((0.5,), (0.5,)),
-        "cifar10": ((0.5,), (0.5,)),
-        "cifar100": ((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
-    }
+    norm_params = ((0.5,), (0.5,))
+    if name == "cifar100" and not convex:
+        norm_params = ((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
+
     train_transform = transforms.Compose([
                             transforms.ToTensor(),
-                            transforms.Normalize(*dataset_stats[name])
+                            transforms.Normalize(*norm_params)
                         ])
 
-    if name == "cifar100":
+    if name == "cifar100" and not convex:
         train_transform = transforms.Compose([
                 transforms.RandomCrop(32, padding=4, padding_mode='reflect'),
                 transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
-                transforms.Normalize(*dataset_stats[name], inplace=True)
+                transforms.Normalize(*norm_params, inplace=True)
             ])
 
     test_transform = transforms.Compose([
                         transforms.ToTensor(),
-                        transforms.Normalize(*dataset_stats[name])
+                        transforms.Normalize(*norm_params)
                     ])
 
     loaderDict = {
