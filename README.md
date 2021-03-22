@@ -117,6 +117,10 @@ Below are the links to our corresponsing projects on Weights and Biases
 
 <a href="https://wandb.ai/yashsarrof/ResNet">CIFAR10 ResNet-18 analysis</a>
 
+<a href="https://wandb.ai/naruarjun/Hyperparameter-training-cifar100-200-model-final">Hyperparameter Grid Search for CIFAR 100 </a>
+
+<a href="https://wandb.ai/naruarjun/Hyperparameter-training">Hyperparameter Grid Search for MNIST and CIFAR 10 </a>
+
 <!-- CONTRIBUTING -->
 ## Contributing
 

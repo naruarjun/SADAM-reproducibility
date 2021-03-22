@@ -42,7 +42,7 @@ parser.add_argument('--convex', type=str2bool, default=False,
                     help='Whether loss fn is convex or not')
 
 parser.add_argument('--decay', type=float, default=1e-2,
-                    help='Whether Decay for LR is to be done')
+                    help='Regularisation factor')
 
 parser.add_argument('--beta1', type=float, default=0.9,
                     help='Beta1 Hyperparam for SAdam')
