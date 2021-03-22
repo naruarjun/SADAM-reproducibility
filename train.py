@@ -72,11 +72,16 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
  classes, channels, instances) = PT.get_dataset(args.dataset, args.batch_size)
 
 model = PT.get_model(args.model, inpsize, classes, channels)
+
+if not args.convex:
+    decay_rate = 0
+else:
+    decay_rate = 1e-2
+
 optimizer = PT.get_optimizer(
                 list(model.parameters()), args.optimizer, args.lr,
-                args.convex, args.decay, args.beta1, args.gamma)
+                args.convex, decay_rate, args.beta1, args.gamma)
 model.to(device)
-
 
 if args.model == "logistic":
     optimizer = torch.optim.Adam(
